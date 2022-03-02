@@ -1,0 +1,169 @@
+-- MySQL Workbench Forward Engineering
+
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+
+-- -----------------------------------------------------
+-- Schema busManagementSystem
+-- -----------------------------------------------------
+
+-- -----------------------------------------------------
+-- Schema busManagementSystem
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `busManagementSystem` DEFAULT CHARACTER SET utf8 ;
+USE `busManagementSystem` ;
+
+-- -----------------------------------------------------
+-- Table `busManagementSystem`.`PASSENGER`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `busManagementSystem`.`PASSENGER` (
+  `passengerID` INT NOT NULL AUTO_INCREMENT,
+  `passengerFN` VARCHAR(45) NOT NULL,
+  `passengerLN` VARCHAR(45) NOT NULL,
+  `passengerDOB` DATE NOT NULL,
+  `passengerPhone` DECIMAL(8,0) NOT NULL,
+  `passengerEmail` VARCHAR(50) NOT NULL,
+  `passengerPassword` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`passengerID`));
+
+
+-- -----------------------------------------------------
+-- Table `busManagementSystem`.`TRAVELLINE`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `busManagementSystem`.`TRAVELLINE` (
+  `travelLineID` INT NOT NULL AUTO_INCREMENT,
+  `TLStart` VARCHAR(100) NOT NULL,
+  `TLEnd` VARCHAR(100) NOT NULL,
+  `TimeFrom` TIME NOT NULL,
+  PRIMARY KEY (`travelLineID`));
+
+
+-- -----------------------------------------------------
+-- Table `busManagementSystem`.`BUS`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `busManagementSystem`.`BUS` (
+  `busID` INT NOT NULL AUTO_INCREMENT,
+  `busPassengerCount` INT NOT NULL,
+  PRIMARY KEY (`busID`));
+
+
+-- -----------------------------------------------------
+-- Table `busManagementSystem`.`SEAT`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `busManagementSystem`.`SEAT` (
+  `seatID` INT NOT NULL AUTO_INCREMENT,
+  `status` TINYINT(1) NOT NULL DEFAULT 0,
+  `busID` INT NOT NULL,
+  PRIMARY KEY (`seatID`),
+    FOREIGN KEY (`busID`)
+    REFERENCES `busManagementSystem`.`BUS` (`busID`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
+
+-- -----------------------------------------------------
+-- Table `busManagementSystem`.`ONLINETICKET`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `busManagementSystem`.`ONLINETICKET` (
+  `ticketID` INT NOT NULL AUTO_INCREMENT,
+  `ticketDOP` DATETIME NOT NULL,
+  `ticketPickUPLoc` VARCHAR(45) NOT NULL,
+  `ticketDropOffLoc` VARCHAR(45) NOT NULL,
+  `ticketPrice` INT NOT NULL,
+  `resTimeFrom` DATETIME NOT NULL,
+  `resTimeTo` DATETIME NOT NULL,
+  `passengerID` INT NOT NULL,
+  `seatID` INT NOT NULL,
+  PRIMARY KEY (`ticketID`),
+    FOREIGN KEY (`passengerID`)
+    REFERENCES `busManagementSystem`.`PASSENGER` (`passengerID`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+    FOREIGN KEY (`seatID`)
+    REFERENCES `busManagementSystem`.`SEAT` (`seatID`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
+
+-- -----------------------------------------------------
+-- Table `busManagementSystem`.`DRIVER`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `busManagementSystem`.`DRIVER` (
+  `driverID` INT NOT NULL AUTO_INCREMENT,
+  `driverFN` VARCHAR(45) NOT NULL,
+  `driverLN` VARCHAR(45) NOT NULL,
+  `driverAddress` VARCHAR(100) NOT NULL,
+  `driverPhone` DECIMAL(8,0) NOT NULL,
+  `driverDOB` DATE NOT NULL,
+  PRIMARY KEY (`driverID`));
+
+
+-- -----------------------------------------------------
+-- Table `busManagementSystem`.`DRIVES`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `busManagementSystem`.`DRIVES` (
+  `busID` INT NOT NULL,
+  `driverID` INT NOT NULL,
+  `shiftStartTime` DATE NOT NULL,
+  `shiftEndTime` DATE NOT NULL,
+  PRIMARY KEY (`busID`, `driverID`, `shiftStartTime`, `shiftEndTime`),
+    FOREIGN KEY (`busID`)
+    REFERENCES `busManagementSystem`.`BUS` (`busID`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+    FOREIGN KEY (`driverID`)
+    REFERENCES `busManagementSystem`.`DRIVER` (`driverID`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
+
+-- -----------------------------------------------------
+-- Table `busManagementSystem`.`STOP`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `busManagementSystem`.`STOP` (
+  `stopID` INT NOT NULL AUTO_INCREMENT,
+  `stopLocation` VARCHAR(100) NOT NULL,
+  `stopDuration` INT NOT NULL,
+  PRIMARY KEY (`stopID`));
+
+
+-- -----------------------------------------------------
+-- Table `busManagementSystem`.`TRAVELLINESTOP`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `busManagementSystem`.`TRAVELLINESTOP` (
+  `stopID` INT NOT NULL,
+  `travelLineID` INT NOT NULL,
+  PRIMARY KEY (`stopID`, `travelLineID`),
+    FOREIGN KEY (`stopID`)
+    REFERENCES `busManagementSystem`.`STOP` (`stopID`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+    FOREIGN KEY (`travelLineID`)
+    REFERENCES `busManagementSystem`.`TRAVELLINE` (`travelLineID`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
+
+-- -----------------------------------------------------
+-- Table `busManagementSystem`.`BUSTRAVELLINE`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `busManagementSystem`.`BUSTRAVELLINE` (
+  `busID` INT NOT NULL,
+  `travelLineID` INT NOT NULL,
+  `BTLDateFrom` DATE NOT NULL,
+  `BTLDateTo` DATE NOT NULL,
+  PRIMARY KEY (`busID`, `travelLineID`, `BTLDateFrom`, `BTLDateTo`),
+    FOREIGN KEY (`busID`)
+    REFERENCES `busManagementSystem`.`BUS` (`busID`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+    FOREIGN KEY (`travelLineID`)
+    REFERENCES `busManagementSystem`.`TRAVELLINE` (`travelLineID`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
